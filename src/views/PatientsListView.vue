@@ -455,7 +455,7 @@
                   <button
                     v-for="a in alergias"
                     :key="a.id"
-                    @click="toggleSelection(form.allergy_ids, a.id)"
+                    @click="toggleSelection('allergy_ids', a.id)"
                     type="button"
                     :class="[
                       form.allergy_ids.includes(a.id)
@@ -479,7 +479,7 @@
                   <button
                     v-for="p in patologias"
                     :key="p.id"
-                    @click="toggleSelection(form.pathology_ids, p.id)"
+                    @click="toggleSelection('pathology_ids', p.id)"
                     type="button"
                     :class="[
                       form.pathology_ids.includes(p.id)
@@ -624,9 +624,11 @@ const openModal = (modo = 'create') => {
 };
 
 const closeModal = () => {
-  if (loading.value) return;
   modal.value.visible = false;
+  modal.value.modo = 'create';
+  activeTab.value = 'personal';
 };
+
 
 /* Escape para cerrar */
 const onKey = (e) => {
@@ -725,12 +727,13 @@ const abrirEdicion = (p) => {
     social_security: p.social_security ?? '',
     blood_type: p.blood_type ?? '',
     gender: p.gender ?? 'M',
-    allergy_ids: p.allergies_list ? p.allergies_list.map(a => a.id) : [],
-    pathology_ids: p.pathologies ? p.pathologies.map(x => x.id) : [],
+    allergy_ids: Array.isArray(p.allergies) ? p.allergies.map(a => a.id) : [],
+    pathology_ids: Array.isArray(p.pathologies) ? p.pathologies.map(x => x.id) : [],
   };
 
   openModal('edit');
 };
+
 
 /* ======================
    GUARDAR (POST/PUT)
@@ -765,11 +768,14 @@ const savePatient = async () => {
 /* ======================
    MULTISELECT TOGGLE
 ====================== */
-const toggleSelection = (arr, id) => {
-  const index = arr.indexOf(id);
-  if (index === -1) arr.push(id);
-  else arr.splice(index, 1);
+const toggleSelection = (key, id) => {
+  if (!Array.isArray(form.value[key])) form.value[key] = [];
+
+  const idx = form.value[key].indexOf(id);
+  if (idx === -1) form.value[key].push(id);
+  else form.value[key].splice(idx, 1);
 };
+
 
 /* ======================
    EXCEL / PRINT

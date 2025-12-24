@@ -1,22 +1,23 @@
 <template>
     <!-- LOADING OVERLAY GLOBAL (guardar / eliminar) -->
-    <Transition name="fade">
-        <div v-if="isSaving || isDeleting" class="fixed inset-0 z-[120] flex items-center justify-center">
-            <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
-            <div
-                class="relative z-[130] bg-white rounded-[2rem] border border-slate-100 shadow-2xl px-8 py-6 flex items-center gap-4">
-                <Loader2 class="animate-spin text-blue-600" :size="22" />
-                <div>
-                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                        Procesando
-                    </p>
-                    <p class="text-sm font-extrabold text-slate-800">
-                        {{ isDeleting ? 'Eliminando registro...' : 'Guardando cambios...' }}
-                    </p>
-                </div>
-            </div>
-        </div>
-    </Transition>
+<Transition name="fade">
+  <div
+    v-if="(isSaving || isDeleting) && !confirmDelete.visible"
+    class="fixed inset-0 z-[120] flex items-center justify-center"
+  >
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
+
+    <div class="relative z-[130] bg-white rounded-[2rem] border border-slate-100 shadow-2xl px-8 py-6 flex items-center gap-4">
+      <Loader2 class="animate-spin text-blue-600" :size="22" />
+      <div>
+        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Procesando</p>
+        <p class="text-sm font-extrabold text-slate-800">
+          {{ isDeleting ? 'Eliminando registro...' : 'Guardando cambios...' }}
+        </p>
+      </div>
+    </div>
+  </div>
+</Transition>
 
     <!-- TOAST -->
     <Transition name="toast">
