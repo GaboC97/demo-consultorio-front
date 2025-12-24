@@ -740,18 +740,19 @@ const abrirEdicion = (p) => {
 ====================== */
 const savePatient = async () => {
   loading.value = true;
+
   try {
-    console.log('FORM EMAIL >>>', form.value.email, typeof form.value.email);
+    const email = (form.value.email ?? '').trim().toLowerCase();
+
     const payload = {
       ...form.value,
-      first_name: (form.value.first_name || '').toUpperCase(),
-      last_name: (form.value.last_name || '').toUpperCase(),
-      email: (form.value.email || '').trim().toLowerCase(),
+      first_name: (form.value.first_name ?? '').toUpperCase(),
+      last_name: (form.value.last_name ?? '').toUpperCase(),
     };
-console.log('PAYLOAD EMAIL >>>', payload.email, typeof payload.email);
-    // ✅ si estás editando y el email quedó vacío, NO lo mandes
-    if (modal.value.modo === 'edit' && payload.email === '') {
-      delete payload.email;
+
+    // ✅ Solo mandamos email si tiene contenido
+    if (email !== '') {
+      payload.email = email;
     }
 
     if (modal.value.modo === 'edit' && form.value.id) {
@@ -766,11 +767,15 @@ console.log('PAYLOAD EMAIL >>>', payload.email, typeof payload.email);
       fetchPacientes(1);
     }
   } catch (error) {
-    showToast(error.response?.data?.message || 'Error al procesar el registro', 'error');
+    showToast(
+      error.response?.data?.message || 'Error al procesar el registro',
+      'error'
+    );
   } finally {
     loading.value = false;
   }
 };
+
 
 
 /* ======================
