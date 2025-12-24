@@ -57,10 +57,14 @@ const routes = [
     meta: { requiresAuth: true },
   },
   // Captura de rutas inexistentes (404)
-  {
-    path: "/:pathMatch(.*)*",
-    redirect: "/dashboard",
+{
+  path: "/:pathMatch(.*)*",
+  redirect: (to) => {
+    const auth = useAuthStore();
+    return auth.isLoggedIn ? "/dashboard" : "/login";
   },
+}
+
 ];
 
 const router = createRouter({
