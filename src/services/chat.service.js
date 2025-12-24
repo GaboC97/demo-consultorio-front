@@ -18,14 +18,13 @@ export const chatService = {
   },
 
   async markConversationRead(conversationId) {
-    // usa SOLO una ruta, idealmente la del ConversationController
     await axios.post(`/conversations/${conversationId}/read`);
   },
 
   // Messages
   async getMessages(conversationId) {
     const res = await axios.get(`/conversations/${conversationId}/messages`);
-    return res.data.data ?? res.data; // por si tu controller devuelve directo
+    return res.data.data ?? res.data;
   },
 
   async sendMessage(conversationId, body) {

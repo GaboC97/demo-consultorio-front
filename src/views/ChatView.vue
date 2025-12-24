@@ -414,8 +414,8 @@ import axios from "../api/axios";
 const route = useRoute();
 const conversationId = computed(() => route.params.id);
 
-const loading = ref(false); // SOLO para primer carga manual/refresh
-const refreshing = ref(false); // polling silencioso
+const loading = ref(false);
+const refreshing = ref(false);
 const sending = ref(false);
 const error = ref("");
 const draft = ref("");
@@ -473,8 +473,6 @@ const scrollToBottom = () => {
 const onFiles = (e) => {
   const list = Array.from(e?.target?.files || []);
   const merged = [...pickedFiles.value, ...list];
-
-  // opcional: quitar duplicados por name+size
   const unique = [];
   const seen = new Set();
   for (const f of merged) {
@@ -485,8 +483,8 @@ const onFiles = (e) => {
     }
   }
 
-  pickedFiles.value = unique.slice(0, 6); // límite
-  if (fileRef.value) fileRef.value.value = ""; // importante para poder re-elegir el mismo archivo
+  pickedFiles.value = unique.slice(0, 6);
+  if (fileRef.value) fileRef.value.value = "";
 };
 
 const removeFile = (idx) => {
@@ -505,17 +503,13 @@ const isImage = (a) => {
 };
 
 const isPdf = (a) => (a?.mime_type || "") === "application/pdf";
-
-// axios = tu axiosInstance (baseURL: http://127.0.0.1:8000/api)
 const backendOrigin = () => {
-  const base = (axios.defaults.baseURL || "").replace(/\/$/, ""); // http://127.0.0.1:8000/api
-  return base.replace(/\/api$/, ""); // http://127.0.0.1:8000
+  const base = (axios.defaults.baseURL || "").replace(/\/$/, "");
+  return base.replace(/\/api$/, "");
 };
 
 const fileAbsoluteUrl = (a) => {
   const origin = backendOrigin();
-
-  // 1) si backend mandó url, pero viene sin puerto o con otro host, la normalizo
   if (a?.url) {
     try {
       const u = new URL(a.url);
@@ -525,11 +519,8 @@ const fileAbsoluteUrl = (a) => {
       u.port = good.port;
       return u.toString();
     } catch {
-      // sigo al fallback
     }
   }
-
-  // 2) fallback usando file_path
   const path = String(a?.file_path || "").replace(/^\/+/, "");
   return `${origin}/storage/${path}`;
 };
@@ -542,7 +533,6 @@ const openLightbox = (a) => {
   modalUrl.value = fileAbsoluteUrl(a);
   pdfOpen.value = false;
   lightboxOpen.value = true;
-  // foco para ESC
   nextTick(() => {
     const el = document.querySelector("[tabindex='0']");
     el?.focus?.();
@@ -557,8 +547,6 @@ const closeLightbox = () => {
 
 const openPdf = (a) => {
   modalFile.value = a;
-  // Tip: algunos navegadores no muestran PDF si el server fuerza download.
-  // Si eso te pasa, en Laravel podés servirlo inline con headers; pero en local suele andar.
   modalUrl.value = fileAbsoluteUrl(a);
   lightboxOpen.value = false;
   pdfOpen.value = true;
@@ -596,9 +584,7 @@ const fetchConversation = async () => {
   conversation.value = res.data.data ?? res.data;
 };
 
-/**
- * PRIMER CARGA (usa loading + reemplaza)
- */
+
 const fetchMessagesInitial = async (scrollBottom = false) => {
   loading.value = true;
   error.value = "";
@@ -620,10 +606,6 @@ const fetchMessagesInitial = async (scrollBottom = false) => {
   }
 };
 
-/**
- * POLLING SILENCIOSO (NO loading, NO reemplaza)
- * - agrega solo nuevos por id
- */
 const pollMessages = async () => {
   if (refreshing.value || loading.value || sending.value) return;
 
@@ -648,7 +630,6 @@ const pollMessages = async () => {
       await axios.post(`/conversations/${conversationId.value}/read`);
     }
   } catch (e) {
-    // silencioso
   } finally {
     refreshing.value = false;
   }
@@ -679,8 +660,6 @@ const send = async () => {
     draft.value = "";
     pickedFiles.value = [];
     if (fileRef.value) fileRef.value.value = "";
-
-    // Traigo el nuevo mensaje (con attachments)
     await pollMessages();
 
     if (stick) {
@@ -766,11 +745,10 @@ onBeforeUnmount(() => {
   border-radius: 10px;
 }
 
-/* Thumb chico (para que no ocupe todo el chat) */
 .thumb-img {
-  width: 260px;            /* tamaño fijo agradable */
+  width: 260px;  
   max-width: 100%;
-  height: 160px;           /* alto controlado */
+  height: 160px;
   object-fit: cover;
   display: block;
   border-radius: 1rem;

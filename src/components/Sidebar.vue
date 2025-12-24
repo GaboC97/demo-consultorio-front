@@ -133,7 +133,6 @@ let pollTimer = null
 
 const parseDate = (v) => (v ? new Date(v).getTime() : null)
 
-// Determina si esa conversación tiene mensajes nuevos para mí
 const hasUnread = (c) => {
   const authUser = JSON.parse(localStorage.getItem('user') || 'null')
   const myId = authUser?.id
@@ -154,12 +153,7 @@ const loadInbox = async () => {
     const res = await axios.get('/conversations')
     const data = res.data?.data ?? res.data ?? []
     inbox.value = data
-
-    // Total de mensajes no leídos (suma)
     unreadCount.value = data.reduce((acc, c) => acc + Number(c.unread_count || 0), 0)
-
-    // Opción B: cantidad de conversaciones con algo sin leer
-    // unreadCount.value = data.filter(c => Number(c.unread_count || 0) > 0).length
   } catch (e) {
     console.error('Inbox error', e)
   }

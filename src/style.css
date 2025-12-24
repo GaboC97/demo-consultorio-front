@@ -1,10 +1,9 @@
 @import "tailwindcss";
 
-/* backdrop premium unificado */
 .modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.55); /* slate-900 real */
+  background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }

@@ -696,13 +696,13 @@ const isDeleting = ref(false);
 
 // --- LOGICA UI ---
 const filtro = ref('hoy');
-const tabLista = ref('turnos'); // 'turnos' | 'derivaciones'
-const filtroDeriv = ref('todas'); // 'todas' | 'enviadas' | 'recibidas'
+const tabLista = ref('turnos');
+const filtroDeriv = ref('todas');
 
 const turnosHoy = ref([]);
 const turnosSemana = ref([]);
 const showModalTurno = ref(false);
-const tabActivo = ref('normal'); // 'normal' | 'derivacion'
+const tabActivo = ref('normal');
 const turnoDetalle = ref(null);
 const notificacion = ref({ visible: false, mensaje: '', tipo: 'success' });
 const formAceptar = ref({ fecha: '', hora: '' });
@@ -726,8 +726,6 @@ const hayModalAbierto = computed(() =>
 
 const cerrarTodo = () => {
   if (isSaving.value || isDeleting.value) return;
-
-  // Prioridad: confirm delete > detalle > modal form
   if (confirmDelete.value.visible) {
     cerrarConfirmEliminar();
     return;
@@ -783,7 +781,6 @@ const puedeGestionarDerivacion = (turno) => {
     return Number(turno.medico_receptor_id) === Number(authStore.user?.id);
 };
 
-// Solo el emisor debería poder editar/eliminar (por tu backend actual)
 const puedeEditar = (turno) => {
     if (!turno) return false;
     if (!esEnviada(turno)) return false;
@@ -1092,7 +1089,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
 }
 
 
-/* --- TRANSICIÓN FADE (Para el Overlay/Fondo) --- */
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.3s ease;
@@ -1103,18 +1099,15 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
     opacity: 0;
 }
 
-/* --- TRANSICIÓN MODAL-POP (Para la Caja Blanca) --- */
-/* Enter: Animación de entrada con un ligero rebote */
+
 .modal-pop-enter-active {
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Leave: Animación de salida más rápida y hacia abajo */
 .modal-pop-leave-active {
     transition: all 0.25s ease-in;
 }
 
-/* Estado inicial (cuando aparece) / Estado final (cuando se va) */
 .modal-pop-enter-from {
     opacity: 0;
     transform: scale(0.9) translateY(30px);
@@ -1125,7 +1118,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
     transform: scale(0.95) translateY(20px);
 }
 
-/* --- ESTILOS EXTRA PARA EL SCROLLBAR (Opcional, para que el modal se vea limpio) --- */
+
 .overflow-y-auto::-webkit-scrollbar {
     width: 6px;
 }
@@ -1136,17 +1129,13 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
 
 .overflow-y-auto::-webkit-scrollbar-thumb {
     background: #e2e8f0;
-    /* slate-200 */
     border-radius: 10px;
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
     background: #cbd5e1;
-    /* slate-300 */
 }
 
-/* --- PREVENIR SCROLL EN EL BODY CUANDO EL MODAL ESTÁ ABIERTO --- */
-/* (Esto se maneja usualmente con lógica de Vue, pero estos estilos ayudan) */
 .fixed {
     backface-visibility: hidden;
     -webkit-font-smoothing: antialiased;

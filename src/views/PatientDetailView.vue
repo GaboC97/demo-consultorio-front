@@ -571,7 +571,7 @@ const mensajeExito = ref('');
 // UI
 const showModal = ref(false);
 const showEditBack = ref(false);
-const showPatientDetails = ref(false); // ✅ NUEVO
+const showPatientDetails = ref(false);
 const enviando = ref(false);
 const errorNuevaConsulta = ref('');
 
@@ -686,7 +686,7 @@ const formatearGenero = (g) => {
     if (g === 'M') return 'Masculino';
     if (g === 'F') return 'Femenino';
     if (g === 'X') return 'Otro / X';
-    return g; // fallback por si viene distinto
+    return g;
 };
 
 const descargarPDF = async (id) => {

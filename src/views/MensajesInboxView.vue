@@ -223,7 +223,6 @@ const loading = ref(false)
 const conversations = ref([])
 const search = ref('')
 
-// Modal new chat
 const newChat = ref({
     open: false,
     query: '',
@@ -253,14 +252,8 @@ const filtered = computed(() => {
 
 const goChat = (id) => router.push(`/mensajes/${id}`)
 
-/**
- * Helpers display
- * OJO: tu back puede devolver lastMessage o last_message, etc. dejo fallback.
- */
 const titleFor = (c) => {
-    // conversación directa: mostrar "el otro"
     const users = c.users ?? []
-    // intenta usar "my user id" desde localStorage si lo tenés
     const me = getMyId()
 
     const other = users.find(u => u.id !== me) ?? users[0]
@@ -292,7 +285,6 @@ const initials = (name) => {
     return `${a}${b}`
 }
 
-// Unread badge (si tu back aún no manda unread_count, lo dejamos “soft”)
 const hasUnread = (c) => {
     return (c.unread_count ?? 0) > 0
 }
@@ -335,7 +327,6 @@ const fetchUsers = async () => {
     }
 
     try {
-        // tu back actual NO filtra por q => traemos lista y filtramos acá
         const res = await axios.get('/users', { params: { role: 'medico', q: newChat.value.query } })
         const list = res.data.data ?? res.data
         newChat.value.users = (list || []

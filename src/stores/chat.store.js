@@ -39,11 +39,7 @@ export const useChatStore = defineStore("chat", {
       try {
         this.activeConversation = await chatService.getConversation(conversationId);
         this.messages = await chatService.getMessages(conversationId);
-
-        // marcar leído al abrir
         await chatService.markConversationRead(conversationId);
-
-        // refrescar inbox para sacar badges
         await this.fetchInbox();
       } finally {
         this.loadingMessages = false;
@@ -56,7 +52,6 @@ export const useChatStore = defineStore("chat", {
 
       this.sending = true;
       try {
-        // optimista: lo agregamos al toque (opcional)
         const temp = {
           id: `temp-${Date.now()}`,
           body,
@@ -65,14 +60,9 @@ export const useChatStore = defineStore("chat", {
           _optimistic: true,
         };
         this.messages.push(temp);
-
         const saved = await chatService.sendMessage(conversationId, body);
-
-        // reemplazar el temp
         const idx = this.messages.findIndex((m) => m.id === temp.id);
         if (idx !== -1) this.messages[idx] = saved;
-
-        // refrescar inbox (último mensaje/last_message_at)
         await this.fetchInbox();
       } finally {
         this.sending = false;
@@ -84,13 +74,9 @@ export const useChatStore = defineStore("chat", {
     // -------------------------
     startPolling() {
       this.stopPolling();
-
-      // inbox cada 10s
       this.pollInboxTimer = setInterval(() => {
         this.fetchInbox();
       }, 10000);
-
-      // mensajes de la conversación activa cada 3s
       this.pollMessagesTimer = setInterval(async () => {
         if (!this.activeConversationId) return;
         const msgs = await chatService.getMessages(this.activeConversationId);

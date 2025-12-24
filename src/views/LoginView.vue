@@ -102,7 +102,6 @@ const cargando = ref(false);
 const showPassword = ref(false);
 const rememberMe = ref(false);
 
-// Cargar email si se recordó anteriormente
 onMounted(() => {
   const savedEmail = localStorage.getItem('remembered_email');
   if (savedEmail) {
@@ -115,8 +114,6 @@ const handleLogin = async () => {
   cargando.value = true;
   try {
     await auth.login(form.value);
-    
-    // Lógica de Recordarme
     if (rememberMe.value) {
       localStorage.setItem('remembered_email', form.value.email);
     } else {
@@ -133,7 +130,6 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-/* Transición suave para el foco de los inputs */
 input {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }

@@ -568,7 +568,7 @@ let timeout = null;
 /* ======================
    MODAL PREMIUM / FORM
 ====================== */
-const modal = ref({ visible: false, modo: 'create' }); // create | edit
+const modal = ref({ visible: false, modo: 'create' });
 const activeTab = ref('personal');
 const loading = ref(false);
 
@@ -775,7 +775,6 @@ const toggleSelection = (arr, id) => {
    EXCEL / PRINT
 ====================== */
 const exportarExcel = () => {
-  // Ejemplo: exporta lo que está en pantalla
   const data = pacientes.value.map(p => ({
     ID: p.id,
     Apellido: p.last_name,

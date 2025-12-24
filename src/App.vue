@@ -21,7 +21,6 @@
 import { useAuthStore } from './stores/auth';
 import { useRouter } from 'vue-router';
 
-// IMPORTACIONES DE TUS COMPONENTES
 import Sidebar from './components/Sidebar.vue';
 import Header from './components/Header.vue';
 

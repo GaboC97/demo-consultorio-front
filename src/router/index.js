@@ -12,7 +12,7 @@ const routes = [
     path: "/login",
     name: "Login",
     component: Login,
-    meta: { requiresGuest: true }, // Solo para gente NO logueada
+    meta: { requiresGuest: true },
   },
   {
     path: "/",
@@ -68,23 +68,17 @@ const router = createRouter({
   routes,
 });
 
-/**
- * GUARDIA DE SEGURIDAD GLOBAL
- */
+
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore();
-
-  // Caso 1: La ruta requiere autenticación y el médico no está logueado
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
     return next({ name: "Login" });
   }
 
-  // Caso 2: El médico ya está logueado e intenta ir al Login
   if (to.meta.requiresGuest && auth.isLoggedIn) {
     return next({ name: "Dashboard" });
   }
 
-  // Caso 3: Todo está en orden, procedemos
   next();
 });
 
