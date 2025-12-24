@@ -1,8 +1,7 @@
 <template>
     <!-- LOADING OVERLAY GLOBAL (guardar / eliminar) -->
     <Transition name="fade">
-        <div v-if="(isSaving || isDeleting) && !confirmDelete.visible"
-            class="fixed inset-0 z-[120] flex items-center justify-center">
+ <div v-if="isSaving" class="fixed inset-0 z-[120] flex items-center justify-center">
             <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
 
             <div
