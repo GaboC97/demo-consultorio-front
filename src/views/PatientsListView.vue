@@ -745,7 +745,13 @@ const savePatient = async () => {
       ...form.value,
       first_name: (form.value.first_name || '').toUpperCase(),
       last_name: (form.value.last_name || '').toUpperCase(),
+      email: (form.value.email || '').trim().toLowerCase(),
     };
+
+    // ✅ si estás editando y el email quedó vacío, NO lo mandes
+    if (modal.value.modo === 'edit' && payload.email === '') {
+      delete payload.email;
+    }
 
     if (modal.value.modo === 'edit' && form.value.id) {
       await axios.put(`/pacientes/${form.value.id}`, payload);
@@ -764,6 +770,7 @@ const savePatient = async () => {
     loading.value = false;
   }
 };
+
 
 /* ======================
    MULTISELECT TOGGLE
