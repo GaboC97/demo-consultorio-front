@@ -741,13 +741,14 @@ const abrirEdicion = (p) => {
 const savePatient = async () => {
   loading.value = true;
   try {
+    console.log('FORM EMAIL >>>', form.value.email, typeof form.value.email);
     const payload = {
       ...form.value,
       first_name: (form.value.first_name || '').toUpperCase(),
       last_name: (form.value.last_name || '').toUpperCase(),
       email: (form.value.email || '').trim().toLowerCase(),
     };
-
+console.log('PAYLOAD EMAIL >>>', payload.email, typeof payload.email);
     // ✅ si estás editando y el email quedó vacío, NO lo mandes
     if (modal.value.modo === 'edit' && payload.email === '') {
       delete payload.email;
