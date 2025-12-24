@@ -232,7 +232,7 @@
             </section>
         </div>
 
-        <!-- MODAL DETALLES PACIENTE (NUEVO) -->
+        <!-- MODAL DETALLES PACIENTE -->
         <Transition name="modal-fade">
             <div v-if="showPatientDetails" class="fixed inset-0 z-[190] flex items-center justify-center p-4"
                 @click.self="showPatientDetails = false">
@@ -356,7 +356,7 @@
             </div>
         </Transition>
 
-        <!-- MODAL NUEVA CONSULTA (premium) -->
+        <!-- MODAL NUEVA CONSULTA -->
         <Transition name="modal-fade">
             <div v-if="showModal" class="fixed absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-[180] flex items-center justify-center p-4"
                 @click.self="showModal = false">
@@ -457,7 +457,7 @@
                 @click.self="showEditBack = false">
                 <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
 
-                <!-- MODAL EDITAR BACK (PREMIUM) -->
+                <!-- MODAL EDITAR BACK -->
                 <Transition name="modal-fade">
                     <div v-if="showEditBack" class="fixed inset-0 z-[180] flex items-center justify-center p-4"
                         @click.self="showEditBack = false">

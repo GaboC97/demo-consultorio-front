@@ -848,21 +848,28 @@ const listaAMostrar = computed(() => {
 
 // --- ACCIONES API ---
 const fetchAgenda = async () => {
-    try {
-        const { data } = await axios.get('/turnos');
-        const hoyStr = new Date().toISOString().substr(0, 10);
+  try {
+    const { data } = await axios.get("/turnos");
 
-        turnosHoy.value = data.filter(t => {
-            const esDeHoy = t.fecha === hoyStr;
-            const esDerivacionPendiente = Number(t.es_derivacion) === 1 && !t.fecha;
-            return esDeHoy || esDerivacionPendiente;
-        });
+    // Fecha actual en horario de Argentina
+    const hoyStr = new Date().toLocaleDateString("sv-SE", {
+      timeZone: "America/Argentina/Buenos_Aires",
+    }); // formato YYYY-MM-DD
 
-        turnosSemana.value = data;
-    } catch (e) {
-        console.error(e);
-    }
+    turnosHoy.value = data.filter((t) => {
+      const esDeHoy = t.fecha === hoyStr;
+      const esDerivacionPendiente =
+        Number(t.es_derivacion) === 1 && !t.fecha;
+
+      return esDeHoy || esDerivacionPendiente;
+    });
+
+    turnosSemana.value = data;
+  } catch (e) {
+    console.error(e);
+  }
 };
+
 
 const fetchMedicos = async () => {
     try {
@@ -978,26 +985,34 @@ const abrirConfirmEliminar = (turno) => {
     confirmDelete.value = { visible: true, turno };
 };
 
-const cerrarConfirmEliminar = () => {
-    if (isDeleting.value) return;
-    confirmDelete.value = { visible: false, turno: null };
+const cerrarConfirmEliminar = (force = false) => {
+  if (isDeleting.value && !force) return;
+  confirmDelete.value = { visible: false, turno: null };
 };
 
 const confirmarEliminar = async () => {
-    const turno = confirmDelete.value.turno;
-    if (!turno || isDeleting.value) return;
+  const turno = confirmDelete.value.turno;
+  if (!turno || isDeleting.value) return;
 
-    try {
-        isDeleting.value = true;
-        await axios.delete(`/turnos/${turno.id}`);
-        cerrarConfirmEliminar();
-        mostrarToast('Eliminado correctamente');
-        await fetchAgenda();
-    } catch (e) {
-        mostrarToast(e.response?.data?.error || 'Error al eliminar', 'error');
-    } finally {
-        isDeleting.value = false;
-    }
+  try {
+    isDeleting.value = true;
+
+    await axios.delete(`/turnos/${turno.id}`);
+
+    // ✅ Cerrar SIEMPRE aunque esté eliminando
+    cerrarConfirmEliminar(true);
+
+    mostrarToast("Eliminado correctamente");
+    turnosHoy.value = turnosHoy.value.filter(t => t.id !== turno.id);
+turnosSemana.value = turnosSemana.value.filter(t => t.id !== turno.id);
+await fetchAgenda();
+
+    await fetchAgenda();
+  } catch (e) {
+    mostrarToast(e.response?.data?.error || "Error al eliminar", "error");
+  } finally {
+    isDeleting.value = false;
+  }
 };
 
 // Modal Nuevo
