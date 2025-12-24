@@ -1,23 +1,22 @@
 <template>
     <!-- LOADING OVERLAY GLOBAL (guardar / eliminar) -->
-<Transition name="fade">
-  <div
-    v-if="(isSaving || isDeleting) && !confirmDelete.visible"
-    class="fixed inset-0 z-[120] flex items-center justify-center"
-  >
-    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
+    <Transition name="fade">
+        <div v-if="(isSaving || isDeleting) && !confirmDelete.visible"
+            class="fixed inset-0 z-[120] flex items-center justify-center">
+            <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
 
-    <div class="relative z-[130] bg-white rounded-[2rem] border border-slate-100 shadow-2xl px-8 py-6 flex items-center gap-4">
-      <Loader2 class="animate-spin text-blue-600" :size="22" />
-      <div>
-        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Procesando</p>
-        <p class="text-sm font-extrabold text-slate-800">
-          {{ isDeleting ? 'Eliminando registro...' : 'Guardando cambios...' }}
-        </p>
-      </div>
-    </div>
-  </div>
-</Transition>
+            <div
+                class="relative z-[130] bg-white rounded-[2rem] border border-slate-100 shadow-2xl px-8 py-6 flex items-center gap-4">
+                <Loader2 class="animate-spin text-blue-600" :size="22" />
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Procesando</p>
+                    <p class="text-sm font-extrabold text-slate-800">
+                        {{ isDeleting ? 'Eliminando registro...' : 'Guardando cambios...' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </Transition>
 
     <!-- TOAST -->
     <Transition name="toast">
@@ -109,12 +108,15 @@
                     :class="{ 'bg-amber-50/30': Number(turno.es_derivacion) === 1 && !turno.fecha }">
                     <div class="flex items-center gap-8">
                         <div class="flex flex-col items-center min-w-[80px]">
-                            <span class="text-2xl font-black text-slate-800 leading-none">{{ turno.hora || '--:--'
-                                }}</span>
+                            <span class="text-2xl font-black text-slate-800 leading-none">
+                                {{ formatHora(turno.hora) }}
+                            </span>
+
                             <span :class="[turno.fecha ? 'text-blue-500 bg-blue-50' : 'text-amber-500 bg-amber-50']"
                                 class="text-[10px] font-black uppercase mt-2 px-2 py-0.5 rounded-md">
-                                {{ turno.fecha || 'Por asignar' }}
+                                {{ turno.fecha ? formatFecha(turno.fecha) : 'Por asignar' }}
                             </span>
+
                         </div>
 
                         <div class="h-12 w-[2px] bg-slate-100"></div>
@@ -205,305 +207,267 @@
     </div>
 
     <!-- MODAL NUEVO / EDITAR -->
-<!-- MODAL NUEVO / EDITAR (CON TABS FLOTANTES CENTRADOS) -->
-<Transition name="fade">
-  <div
-    v-if="showModalTurno"
-    class="fixed absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-[180] flex items-center justify-center p-4"
-    @click.self="isSaving ? null : cerrarModal()"
-  >
-    <!-- backdrop -->
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+    <!-- MODAL NUEVO / EDITAR (CON TABS FLOTANTES CENTRADOS) -->
+    <Transition name="fade">
+        <div v-if="showModalTurno"
+            class="fixed absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-[180] flex items-center justify-center p-4"
+            @click.self="isSaving ? null : cerrarModal()">
+            <!-- backdrop -->
+            <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
 
-    <div class="pointer-events-none absolute inset-0
+            <div class="pointer-events-none absolute inset-0
              bg-gradient-to-b from-white/5 via-transparent to-black/10"></div>
-    <Transition name="modal-pop" appear>
-      <div
-        v-if="showModalTurno"
-        class="w-full max-w-lg relative z-[190]"
-        @click.stop
-      >
-        <div
-          class="bg-white rounded-[2.5rem] shadow-2xl border border-white overflow-hidden flex flex-col max-h-[90vh]"
-        >
-          <!-- HEADER -->
-          <div class="relative px-8 pt-10 pb-10 overflow-hidden bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-950 rounded-t-[2.5rem]">
-            <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-400/10 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-indigo-400/10 rounded-full blur-3xl"></div>
+            <Transition name="modal-pop" appear>
+                <div v-if="showModalTurno" class="w-full max-w-lg relative z-[190]" @click.stop>
+                    <div
+                        class="bg-white rounded-[2.5rem] shadow-2xl border border-white overflow-hidden flex flex-col max-h-[90vh]">
+                        <!-- HEADER -->
+                        <div
+                            class="relative px-8 pt-10 pb-10 overflow-hidden bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-950 rounded-t-[2.5rem]">
+                            <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-400/10 rounded-full blur-3xl">
+                            </div>
+                            <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-indigo-400/10 rounded-full blur-3xl">
+                            </div>
 
-            <div class="relative z-10 flex flex-col gap-5">
-              <div>
-                <div class="flex items-center gap-2 mb-2">
-                  <span
-                    :class="[modoEdicion ? 'bg-amber-400/20 text-amber-300 border-amber-400/30' : 'bg-blue-400/20 text-blue-300 border-blue-400/30']"
-                    class="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] border backdrop-blur-md"
-                  >
-                    {{ modoEdicion ? 'Modo Edición' : 'Nuevo Registro' }}
-                  </span>
-                </div>
+                            <div class="relative z-10 flex flex-col gap-5">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span
+                                            :class="[modoEdicion ? 'bg-amber-400/20 text-amber-300 border-amber-400/30' : 'bg-blue-400/20 text-blue-300 border-blue-400/30']"
+                                            class="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-[0.15em] border backdrop-blur-md">
+                                            {{ modoEdicion ? 'Modo Edición' : 'Nuevo Registro' }}
+                                        </span>
+                                    </div>
 
-                <h3 class="text-3xl font-black text-white tracking-tight">
-                  {{
-                    modoEdicion
-                      ? (tabActivo === 'derivacion' ? 'Editar Derivación' : 'Editar Turno')
-                      : (tabActivo === 'derivacion' ? 'Nueva Derivación' : 'Nuevo Turno')
-                  }}
-                </h3>
+                                    <h3 class="text-3xl font-black text-white tracking-tight">
+                                        {{
+                                            modoEdicion
+                                                ? (tabActivo === 'derivacion' ? 'Editar Derivación' : 'Editar Turno')
+                                                : (tabActivo === 'derivacion' ? 'Nueva Derivación' : 'Nuevo Turno')
+                                        }}
+                                    </h3>
 
-                <p class="text-blue-100/60 text-xs font-medium mt-1">
-                  {{ modoEdicion ? 'Actualice los datos del registro médico' : 'Complete los campos para generar la orden médica' }}
-                </p>
-              </div>
-            </div>
-          </div>
+                                    <p class="text-blue-100/60 text-xs font-medium mt-1">
+                                        {{ modoEdicion ? 'Actualice los datos del registro médico' : 'Complete los campos para generar la orden médica' }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
 
-          <!-- TABS FLOTANTES (CENTRADOS) -->
-          <div class="px-8 -mt-6 relative z-[200] flex justify-center">
-            <div class="bg-white/80 backdrop-blur-xl border border-slate-200 shadow-2xl rounded-[1.75rem] p-2 flex gap-2 w-full sm:w-fit">
-              <button
-                type="button"
-                @click="tabActivo = 'normal'"
-                :disabled="isSaving || (modoEdicion && Number(turnoEditandoEsDerivacion) === 1)"
-                :class="[
-                  tabActivo === 'normal'
-                    ? 'bg-slate-900 text-white shadow-xl scale-100'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white scale-95',
-                  (modoEdicion && Number(turnoEditandoEsDerivacion) === 1) ? 'opacity-30 cursor-not-allowed' : ''
-                ]"
-                class="flex-1 sm:flex-none px-8 py-3 rounded-[1.35rem] text-[10px] font-black uppercase transition-all duration-300"
-              >
-                Turno
-              </button>
+                        <!-- TABS FLOTANTES (CENTRADOS) -->
+                        <div class="px-8 -mt-6 relative z-[200] flex justify-center">
+                            <div
+                                class="bg-white/80 backdrop-blur-xl border border-slate-200 shadow-2xl rounded-[1.75rem] p-2 flex gap-2 w-full sm:w-fit">
+                                <button type="button" @click="tabActivo = 'normal'"
+                                    :disabled="isSaving || (modoEdicion && Number(turnoEditandoEsDerivacion) === 1)"
+                                    :class="[
+                                        tabActivo === 'normal'
+                                            ? 'bg-slate-900 text-white shadow-xl scale-100'
+                                            : 'text-slate-600 hover:text-slate-900 hover:bg-white scale-95',
+                                        (modoEdicion && Number(turnoEditandoEsDerivacion) === 1) ? 'opacity-30 cursor-not-allowed' : ''
+                                    ]" class="flex-1 sm:flex-none px-8 py-3 rounded-[1.35rem] text-[10px] font-black uppercase transition-all duration-300">
+                                    Turno
+                                </button>
 
-              <button
-                type="button"
-                @click="tabActivo = 'derivacion'"
-                :disabled="isSaving || (modoEdicion && Number(turnoEditandoEsDerivacion) === 0)"
-                :class="[
-                  tabActivo === 'derivacion'
-                    ? 'bg-slate-900 text-white shadow-xl scale-100'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white scale-95',
-                  (modoEdicion && Number(turnoEditandoEsDerivacion) === 0) ? 'opacity-30 cursor-not-allowed' : ''
-                ]"
-                class="flex-1 sm:flex-none px-8 py-3 rounded-[1.35rem] text-[10px] font-black uppercase transition-all duration-300"
-              >
-                Derivación
-              </button>
-            </div>
-          </div>
+                                <button type="button" @click="tabActivo = 'derivacion'"
+                                    :disabled="isSaving || (modoEdicion && Number(turnoEditandoEsDerivacion) === 0)"
+                                    :class="[
+                                        tabActivo === 'derivacion'
+                                            ? 'bg-slate-900 text-white shadow-xl scale-100'
+                                            : 'text-slate-600 hover:text-slate-900 hover:bg-white scale-95',
+                                        (modoEdicion && Number(turnoEditandoEsDerivacion) === 0) ? 'opacity-30 cursor-not-allowed' : ''
+                                    ]" class="flex-1 sm:flex-none px-8 py-3 rounded-[1.35rem] text-[10px] font-black uppercase transition-all duration-300">
+                                    Derivación
+                                </button>
+                            </div>
+                        </div>
 
-          <!-- BODY (COMPENSA EL -mt DE LOS TABS) -->
-          <div class="p-8 pt-12 overflow-y-auto bg-white">
-            <form @submit.prevent="guardarTurno" class="space-y-6">
-              <!-- Paciente -->
-              <div class="relative">
-                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-1.5 block">
-                  Paciente
-                </label>
+                        <!-- BODY (COMPENSA EL -mt DE LOS TABS) -->
+                        <div class="p-8 pt-12 overflow-y-auto bg-white">
+                            <form @submit.prevent="guardarTurno" class="space-y-6">
+                                <!-- Paciente -->
+                                <div class="relative">
+                                    <label
+                                        class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-1.5 block">
+                                        Paciente
+                                    </label>
 
-                <input
-                  v-model="busquedaPaciente"
-                  :disabled="isSaving"
-                  type="text"
-                  placeholder="Buscar por DNI o Apellido..."
-                  class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm focus:border-blue-500/50 transition-all disabled:opacity-60"
-                />
+                                    <input v-model="busquedaPaciente" :disabled="isSaving" type="text"
+                                        placeholder="Buscar por DNI o Apellido..."
+                                        class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm focus:border-blue-500/50 transition-all disabled:opacity-60" />
 
-                <div
-                  v-if="resultadosPacientes.length > 0 && !isSaving"
-                  class="absolute z-[80] w-full mt-2 bg-white border border-slate-100 shadow-2xl rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2"
-                >
-                  <button
-                    v-for="p in resultadosPacientes"
-                    :key="p.id"
-                    type="button"
-                    @click="seleccionarPaciente(p)"
-                    class="w-full px-5 py-4 text-left hover:bg-blue-50 border-b border-slate-50 flex justify-between items-center transition-colors group"
-                  >
-                    <span class="font-bold text-slate-700 text-sm group-hover:text-blue-600">
-                      {{ p.last_name }}, {{ p.first_name }}
-                    </span>
-                    <span class="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-lg">
-                      DNI: {{ p.dni }}
-                    </span>
-                  </button>
-                </div>
-              </div>
+                                    <div v-if="resultadosPacientes.length > 0 && !isSaving"
+                                        class="absolute z-[80] w-full mt-2 bg-white border border-slate-100 shadow-2xl rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2">
+                                        <button v-for="p in resultadosPacientes" :key="p.id" type="button"
+                                            @click="seleccionarPaciente(p)"
+                                            class="w-full px-5 py-4 text-left hover:bg-blue-50 border-b border-slate-50 flex justify-between items-center transition-colors group">
+                                            <span class="font-bold text-slate-700 text-sm group-hover:text-blue-600">
+                                                {{ p.last_name }}, {{ p.first_name }}
+                                            </span>
+                                            <span
+                                                class="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-lg">
+                                                DNI: {{ p.dni }}
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
 
-              <!-- Derivación -->
-              <div v-if="tabActivo === 'derivacion'" class="space-y-6">
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-1.5 block">
-                      Médico Destino
-                    </label>
-                    <select
-                      v-model="formTurno.medico_id"
-                      :disabled="isSaving"
-                      class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm appearance-none disabled:opacity-60"
-                    >
-                      <option value="" disabled>Seleccione...</option>
-                      <option v-for="med in medicosFiltrados" :key="med.id" :value="med.id">
-                        Dr/a. {{ med.nombre }}
-                      </option>
-                    </select>
-                  </div>
+                                <!-- Derivación -->
+                                <div v-if="tabActivo === 'derivacion'" class="space-y-6">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label
+                                                class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-1.5 block">
+                                                Médico Destino
+                                            </label>
+                                            <select v-model="formTurno.medico_id" :disabled="isSaving"
+                                                class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm appearance-none disabled:opacity-60">
+                                                <option value="" disabled>Seleccione...</option>
+                                                <option v-for="med in medicosFiltrados" :key="med.id" :value="med.id">
+                                                    Dr/a. {{ med.nombre }}
+                                                </option>
+                                            </select>
+                                        </div>
 
-                  <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-1.5 block">
-                      Prioridad
-                    </label>
-                    <select
-                      v-model="formTurno.prioridad"
-                      :disabled="isSaving"
-                      class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm appearance-none disabled:opacity-60"
-                    >
-                      <option value="baja">🟢 Baja</option>
-                      <option value="media">🟡 Media</option>
-                      <option value="alta">🟠 Alta</option>
-                      <option value="urgente">🔴 Urgente</option>
-                    </select>
-                  </div>
-                </div>
+                                        <div>
+                                            <label
+                                                class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-1.5 block">
+                                                Prioridad
+                                            </label>
+                                            <select v-model="formTurno.prioridad" :disabled="isSaving"
+                                                class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm appearance-none disabled:opacity-60">
+                                                <option value="baja">🟢 Baja</option>
+                                                <option value="media">🟡 Media</option>
+                                                <option value="alta">🟠 Alta</option>
+                                                <option value="urgente">🔴 Urgente</option>
+                                            </select>
+                                        </div>
+                                    </div>
 
-                <div>
-                  <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-1.5 block">
-                    Documentación
-                  </label>
+                                    <div>
+                                        <label
+                                            class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-1.5 block">
+                                            Documentación
+                                        </label>
 
-                  <input
-                    type="file"
-                    ref="fileInput"
-                    @change="manejarArchivos"
-                    multiple
-                    class="hidden"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    :disabled="modoEdicion || isSaving"
-                  />
+                                        <input type="file" ref="fileInput" @change="manejarArchivos" multiple
+                                            class="hidden" accept=".pdf,.jpg,.jpeg,.png"
+                                            :disabled="modoEdicion || isSaving" />
 
-                  <div
-                    @click="(modoEdicion || isSaving) ? null : $refs.fileInput.click()"
-                    :class="[(modoEdicion || isSaving) ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-100']"
-                    class="mt-1 border-2 border-dashed border-slate-200 rounded-2xl p-6 flex flex-col items-center justify-center bg-slate-50/50 transition-all"
-                  >
-                    <span class="text-2xl mb-1">📂</span>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
-                      {{ modoEdicion ? 'Adjuntos no editables' : 'Adjuntar estudios' }}
-                    </p>
-                  </div>
-                </div>
-              </div>
+                                        <div @click="(modoEdicion || isSaving) ? null : $refs.fileInput.click()"
+                                            :class="[(modoEdicion || isSaving) ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-100']"
+                                            class="mt-1 border-2 border-dashed border-slate-200 rounded-2xl p-6 flex flex-col items-center justify-center bg-slate-50/50 transition-all">
+                                            <span class="text-2xl mb-1">📂</span>
+                                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
+                                                {{ modoEdicion ? 'Adjuntos no editables' : 'Adjuntar estudios' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
 
-              <!-- Turno -->
-              <div v-if="tabActivo === 'normal'" class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1.5 block">Fecha</label>
-                  <input
-                    v-model="formTurno.fecha"
-                    :disabled="isSaving"
-                    type="date"
-                    class="w-full px-5 py-4 bg-slate-50 border rounded-2xl font-bold text-sm disabled:opacity-60"
-                  >
-                </div>
+                                <!-- Turno -->
+                                <div v-if="tabActivo === 'normal'" class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label
+                                            class="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1.5 block">Fecha</label>
+                                        <input v-model="formTurno.fecha" :disabled="isSaving" type="date"
+                                            class="w-full px-5 py-4 bg-slate-50 border rounded-2xl font-bold text-sm disabled:opacity-60">
+                                    </div>
 
-                <div>
-                  <label class="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1.5 block">Hora</label>
-                  <input
-                    v-model="formTurno.hora"
-                    :disabled="isSaving"
-                    type="time"
-                    class="w-full px-5 py-4 bg-slate-50 border rounded-2xl font-bold text-sm disabled:opacity-60"
-                  >
-                </div>
-              </div>
+                                    <div>
+                                        <label
+                                            class="text-[10px] font-black uppercase text-slate-400 ml-2 mb-1.5 block">Hora</label>
+                                        <input v-model="formTurno.hora" :disabled="isSaving" type="time"
+                                            class="w-full px-5 py-4 bg-slate-50 border rounded-2xl font-bold text-sm disabled:opacity-60">
+                                    </div>
+                                </div>
 
-              <div>
-                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-1.5 block">
-                  Motivo / Observaciones
-                </label>
-                <textarea
-                  v-model="formTurno.motivo"
-                  :disabled="isSaving"
-                  rows="3"
-                  placeholder="Escriba el motivo clínico..."
-                  class="w-full px-5 py-4 bg-slate-50 border rounded-2xl font-bold text-sm resize-none disabled:opacity-60"
-                ></textarea>
-              </div>
+                                <div>
+                                    <label
+                                        class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2 mb-1.5 block">
+                                        Motivo / Observaciones
+                                    </label>
+                                    <textarea v-model="formTurno.motivo" :disabled="isSaving" rows="3"
+                                        placeholder="Escriba el motivo clínico..."
+                                        class="w-full px-5 py-4 bg-slate-50 border rounded-2xl font-bold text-sm resize-none disabled:opacity-60"></textarea>
+                                </div>
 
-              <!-- FOOTER -->
-              <div class="flex gap-4 pt-2">
-                <button
-                  type="button"
-                  @click="cerrarModal"
-                  :disabled="isSaving"
-                  class="flex-1 px-4 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] text-slate-400 hover:text-white hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-100 transition-all disabled:opacity-50"
-                >
-                  Cancelar
-                </button>
+                                <!-- FOOTER -->
+                                <div class="flex gap-4 pt-2">
+                                    <button type="button" @click="cerrarModal" :disabled="isSaving"
+                                        class="flex-1 px-4 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] text-slate-400 hover:text-white hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-100 transition-all disabled:opacity-50">
+                                        Cancelar
+                                    </button>
 
-                <!-- ✅ Botón igual en ambos tabs (azul premium) -->
-                <button
-                  type="submit"
-                  :disabled="isSaving || !pacienteSeleccionado || (tabActivo === 'derivacion' && !formTurno.medico_id)"
-                  class="flex-[1.5] text-white px-4 py-4 rounded-2xl font-black text-[11px] uppercase
+                                    <!-- ✅ Botón igual en ambos tabs (azul premium) -->
+                                    <button type="submit"
+                                        :disabled="isSaving || !pacienteSeleccionado || (tabActivo === 'derivacion' && !formTurno.medico_id)"
+                                        class="flex-[1.5] text-white px-4 py-4 rounded-2xl font-black text-[11px] uppercase
                          bg-indigo-900 shadow-indigo-200
                          shadow-xl shadow-blue-200
                          transition-all flex items-center justify-center gap-2
                          hover:scale-[1.02] active:scale-[0.98]
-                         disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Loader2 v-if="isSaving" class="animate-spin" :size="16" />
-                  <span>{{ modoEdicion ? 'Guardar' : (isSaving ? '...' : 'Confirmar') }}</span>
-                </button>
-              </div>
-            </form>
-          </div>
+                         disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <Loader2 v-if="isSaving" class="animate-spin" :size="16" />
+                                        <span>{{ modoEdicion ? 'Guardar' : (isSaving ? '...' : 'Confirmar') }}</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </Transition>
         </div>
-      </div>
     </Transition>
-  </div>
-</Transition>
 
     <!-- DETALLE DERIVACIÓN -->
-<Transition name="fade">
-        <div v-if="turnoDetalle" class="fixed absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-[180] flex items-center justify-center p-4">
+    <Transition name="fade">
+        <div v-if="turnoDetalle"
+            class="fixed absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-[180] flex items-center justify-center p-4">
             <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
                 @click="(isSaving || isDeleting) ? null : (turnoDetalle = null)"></div>
 
             <Transition name="modal-pop" appear>
                 <div v-if="turnoDetalle"
                     class="bg-white rounded-[2.5rem] w-full max-w-lg relative z-[70] shadow-2xl border border-white/20 overflow-hidden flex flex-col">
-                    
-                    <div class="relative px-8 pt-10 pb-8 overflow-hidden bg-gradient-to-br from-slate-800 via-indigo-900 to-slate-950">
+
+                    <div
+                        class="relative px-8 pt-10 pb-8 overflow-hidden bg-gradient-to-br from-slate-800 via-indigo-900 to-slate-950">
                         <div class="absolute -top-10 -right-10 w-40 h-40 bg-indigo-400/10 rounded-full blur-3xl"></div>
                         <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-slate-400/10 rounded-full blur-3xl"></div>
-                        
+
                         <div class="relative z-10">
                             <div class="flex items-center justify-between mb-6">
                                 <div class="flex items-center gap-4">
-                                    <div class="bg-white/10 p-3 rounded-2xl backdrop-blur-md border border-white/10 shadow-inner">
+                                    <div
+                                        class="bg-white/10 p-3 rounded-2xl backdrop-blur-md border border-white/10 shadow-inner">
                                         <BriefcaseMedical class="w-6 h-6 text-white" />
                                     </div>
                                     <div>
-                                        <p class="text-indigo-200/60 text-[10px] font-black uppercase tracking-[0.2em]">Expediente Médico</p>
+                                        <p class="text-indigo-200/60 text-[10px] font-black uppercase tracking-[0.2em]">
+                                            Expediente Médico</p>
                                         <h3 class="text-2xl font-black text-white tracking-tight">
-                                            {{ turnoDetalle.paciente?.last_name }}, {{ turnoDetalle.paciente?.first_name }}
+                                            {{ turnoDetalle.paciente?.last_name }}, {{ turnoDetalle.paciente?.first_name
+                                            }}
                                         </h3>
                                     </div>
                                 </div>
-                                <div v-if="turnoDetalle.prioridad" 
-                                    :class="getPrioridadClass(turnoDetalle.prioridad)"
+                                <div v-if="turnoDetalle.prioridad" :class="getPrioridadClass(turnoDetalle.prioridad)"
                                     class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase border border-white/10 shadow-lg backdrop-blur-md">
                                     {{ turnoDetalle.prioridad }}
                                 </div>
                             </div>
 
                             <div class="flex flex-wrap gap-3">
-                                <div class="bg-black/20 px-4 py-2 rounded-xl border border-white/5 text-[11px] font-bold text-indigo-100 backdrop-blur-sm">
-                                    <span class="opacity-50 mr-1 font-normal">DNI:</span> {{ turnoDetalle.paciente?.dni }}
+                                <div
+                                    class="bg-black/20 px-4 py-2 rounded-xl border border-white/5 text-[11px] font-bold text-indigo-100 backdrop-blur-sm">
+                                    <span class="opacity-50 mr-1 font-normal">DNI:</span> {{ turnoDetalle.paciente?.dni
+                                    }}
                                 </div>
-                                <div class="bg-black/20 px-4 py-2 rounded-xl border border-white/5 text-[11px] font-bold text-indigo-100 backdrop-blur-sm">
-                                    <span class="opacity-50 mr-1 font-normal">Emisor:</span> Dr/a. {{ turnoDetalle.medico_emisor?.nombre }}
+                                <div
+                                    class="bg-black/20 px-4 py-2 rounded-xl border border-white/5 text-[11px] font-bold text-indigo-100 backdrop-blur-sm">
+                                    <span class="opacity-50 mr-1 font-normal">Emisor:</span> Dr/a. {{
+                                    turnoDetalle.medico_emisor?.nombre }}
                                 </div>
                             </div>
                         </div>
@@ -511,8 +475,11 @@
 
                     <div class="p-8 overflow-y-auto space-y-8 bg-white">
                         <div>
-                            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Motivo de Derivación</h4>
-                            <div class="bg-slate-50 border border-slate-100 p-6 rounded-[1.5rem] relative group transition-all hover:bg-slate-100/50">
+                            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Motivo
+                                de
+                                Derivación</h4>
+                            <div
+                                class="bg-slate-50 border border-slate-100 p-6 rounded-[1.5rem] relative group transition-all hover:bg-slate-100/50">
                                 <p class="text-slate-700 font-bold leading-relaxed italic text-sm">
                                     "{{ turnoDetalle.motivo || 'No se especificó un motivo.' }}"
                                 </p>
@@ -520,54 +487,63 @@
                         </div>
 
                         <div>
-                            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Estudios Adjuntos</h4>
-                            <div v-if="turnoDetalle.archivos && turnoDetalle.archivos.length > 0" class="grid grid-cols-1 gap-3">
+                            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">
+                                Estudios
+                                Adjuntos</h4>
+                            <div v-if="turnoDetalle.archivos && turnoDetalle.archivos.length > 0"
+                                class="grid grid-cols-1 gap-3">
                                 <a v-for="archivo in turnoDetalle.archivos" :key="archivo.id" :href="archivo.url"
                                     target="_blank"
                                     class="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:border-indigo-500 hover:shadow-md transition-all group">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-indigo-50 transition-colors">
-                                            <span class="text-lg text-slate-400 group-hover:text-indigo-500 transition-colors">📄</span>
+                                        <div
+                                            class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-indigo-50 transition-colors">
+                                            <span
+                                                class="text-lg text-slate-400 group-hover:text-indigo-500 transition-colors">📄</span>
                                         </div>
-                                        <span class="text-xs font-black text-slate-600 group-hover:text-slate-900 transition-colors">
+                                        <span
+                                            class="text-xs font-black text-slate-600 group-hover:text-slate-900 transition-colors">
                                             {{ archivo.nombre_original }}
                                         </span>
                                     </div>
-                                    <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest px-3 py-1 bg-indigo-50 rounded-lg group-hover:bg-indigo-500 group-hover:text-white transition-all">Ver</span>
+                                    <span
+                                        class="text-[10px] font-black text-indigo-500 uppercase tracking-widest px-3 py-1 bg-indigo-50 rounded-lg group-hover:bg-indigo-500 group-hover:text-white transition-all">Ver</span>
                                 </a>
                             </div>
 
-                            <div v-else class="bg-amber-50/50 border border-amber-100 p-5 rounded-2xl flex items-center gap-4">
+                            <div v-else
+                                class="bg-amber-50/50 border border-amber-100 p-5 rounded-2xl flex items-center gap-4">
                                 <span class="text-xl">📂</span>
-                                <p class="text-xs font-bold text-amber-700 uppercase tracking-tight">Sin documentación adjunta.</p>
+                                <p class="text-xs font-bold text-amber-700 uppercase tracking-tight">Sin documentación
+                                    adjunta.</p>
                             </div>
                         </div>
 
                         <div v-if="!turnoDetalle.fecha && puedeGestionarDerivacion(turnoDetalle)"
                             class="pt-6 border-t border-dashed border-slate-200">
                             <div class="bg-slate-50 rounded-[2rem] p-8 border border-slate-100">
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 text-center">
+                                <p
+                                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 text-center">
                                     Agendar Cita de Especialista
                                 </p>
                                 <div class="grid grid-cols-2 gap-4 mb-6">
                                     <div class="space-y-1.5">
-                                        <label class="text-[9px] font-black uppercase text-slate-400 ml-2">Fecha sugerida</label>
+                                        <label class="text-[9px] font-black uppercase text-slate-400 ml-2">Fecha
+                                            sugerida</label>
                                         <input v-model="formAceptar.fecha" type="date"
                                             class="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl outline-none font-bold text-sm focus:border-indigo-500 transition-all shadow-sm">
                                     </div>
                                     <div class="space-y-1.5">
-                                        <label class="text-[9px] font-black uppercase text-slate-400 ml-2">Hora sugerida</label>
+                                        <label class="text-[9px] font-black uppercase text-slate-400 ml-2">Hora
+                                            sugerida</label>
                                         <input v-model="formAceptar.hora" type="time"
                                             class="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl outline-none font-bold text-sm focus:border-indigo-500 transition-all shadow-sm">
                                     </div>
                                 </div>
                                 <div class="flex gap-3">
-                                    <button 
-                                        type="button" 
-                                        @click="turnoDetalle = null" 
+                                    <button type="button" @click="turnoDetalle = null"
                                         :disabled="isSaving || isDeleting"
-                                        class="flex-1 px-4 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] text-slate-400 hover:text-white hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-100 transition-all"
-                                    >
+                                        class="flex-1 px-4 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] text-slate-400 hover:text-white hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-100 transition-all">
                                         Descartar
                                     </button>
 
@@ -582,12 +558,8 @@
                         </div>
 
                         <div v-else class="pt-2">
-                             <button 
-                                type="button" 
-                                @click="turnoDetalle = null" 
-                                :disabled="isSaving || isDeleting"
-                                class="w-full px-4 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] text-slate-400 hover:text-white hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-100 transition-all"
-                            >
+                            <button type="button" @click="turnoDetalle = null" :disabled="isSaving || isDeleting"
+                                class="w-full px-4 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] text-slate-400 hover:text-white hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-100 transition-all">
                                 Salir del Detalle
                             </button>
                         </div>
@@ -647,7 +619,7 @@
                                 <span v-else class="text-blue-600">Turno</span>
                                 <span class="mx-2">•</span>
                                 {{ confirmDelete.turno?.fecha || 'Fecha por asignar' }} {{ confirmDelete.turno?.hora ||
-                                ''
+                                    ''
                                 }}
                             </p>
                         </div>
@@ -720,33 +692,33 @@ const confirmDelete = ref({
 });
 
 const hayModalAbierto = computed(() =>
-  showModalTurno.value ||
-  !!turnoDetalle.value ||
-  confirmDelete.value.visible
+    showModalTurno.value ||
+    !!turnoDetalle.value ||
+    confirmDelete.value.visible
 );
 
 const cerrarTodo = () => {
-  if (isSaving.value || isDeleting.value) return;
-  if (confirmDelete.value.visible) {
-    cerrarConfirmEliminar();
-    return;
-  }
-  if (turnoDetalle.value) {
-    turnoDetalle.value = null;
-    return;
-  }
-  if (showModalTurno.value) {
-    cerrarModal();
-    return;
-  }
+    if (isSaving.value || isDeleting.value) return;
+    if (confirmDelete.value.visible) {
+        cerrarConfirmEliminar();
+        return;
+    }
+    if (turnoDetalle.value) {
+        turnoDetalle.value = null;
+        return;
+    }
+    if (showModalTurno.value) {
+        cerrarModal();
+        return;
+    }
 };
 
 const onKeydown = (e) => {
-  if (e.key !== 'Escape') return;
-  if (!hayModalAbierto.value) return;
+    if (e.key !== 'Escape') return;
+    if (!hayModalAbierto.value) return;
 
-  e.preventDefault();
-  cerrarTodo();
+    e.preventDefault();
+    cerrarTodo();
 };
 
 
@@ -849,26 +821,26 @@ const listaAMostrar = computed(() => {
 
 // --- ACCIONES API ---
 const fetchAgenda = async () => {
-  try {
-    const { data } = await axios.get("/turnos");
+    try {
+        const { data } = await axios.get("/turnos");
 
-    // Fecha actual en horario de Argentina
-    const hoyStr = new Date().toLocaleDateString("sv-SE", {
-      timeZone: "America/Argentina/Buenos_Aires",
-    }); // formato YYYY-MM-DD
+        // Fecha actual en horario de Argentina
+        const hoyStr = new Date().toLocaleDateString("sv-SE", {
+            timeZone: "America/Argentina/Buenos_Aires",
+        }); // formato YYYY-MM-DD
 
-    turnosHoy.value = data.filter((t) => {
-      const esDeHoy = t.fecha === hoyStr;
-      const esDerivacionPendiente =
-        Number(t.es_derivacion) === 1 && !t.fecha;
+        turnosHoy.value = data.filter((t) => {
+            const esDeHoy = t.fecha === hoyStr;
+            const esDerivacionPendiente =
+                Number(t.es_derivacion) === 1 && !t.fecha;
 
-      return esDeHoy || esDerivacionPendiente;
-    });
+            return esDeHoy || esDerivacionPendiente;
+        });
 
-    turnosSemana.value = data;
-  } catch (e) {
-    console.error(e);
-  }
+        turnosSemana.value = data;
+    } catch (e) {
+        console.error(e);
+    }
 };
 
 
@@ -987,33 +959,33 @@ const abrirConfirmEliminar = (turno) => {
 };
 
 const cerrarConfirmEliminar = (force = false) => {
-  if (isDeleting.value && !force) return;
-  confirmDelete.value = { visible: false, turno: null };
+    if (isDeleting.value && !force) return;
+    confirmDelete.value = { visible: false, turno: null };
 };
 
 const confirmarEliminar = async () => {
-  const turno = confirmDelete.value.turno;
-  if (!turno || isDeleting.value) return;
+    const turno = confirmDelete.value.turno;
+    if (!turno || isDeleting.value) return;
 
-  try {
-    isDeleting.value = true;
+    try {
+        isDeleting.value = true;
 
-    await axios.delete(`/turnos/${turno.id}`);
+        await axios.delete(`/turnos/${turno.id}`);
 
-    // ✅ Cerrar SIEMPRE aunque esté eliminando
-    cerrarConfirmEliminar(true);
+        // ✅ Cerrar SIEMPRE aunque esté eliminando
+        cerrarConfirmEliminar(true);
 
-    mostrarToast("Eliminado correctamente");
-    turnosHoy.value = turnosHoy.value.filter(t => t.id !== turno.id);
-turnosSemana.value = turnosSemana.value.filter(t => t.id !== turno.id);
-await fetchAgenda();
+        mostrarToast("Eliminado correctamente");
+        turnosHoy.value = turnosHoy.value.filter(t => t.id !== turno.id);
+        turnosSemana.value = turnosSemana.value.filter(t => t.id !== turno.id);
+        await fetchAgenda();
 
-    await fetchAgenda();
-  } catch (e) {
-    mostrarToast(e.response?.data?.error || "Error al eliminar", "error");
-  } finally {
-    isDeleting.value = false;
-  }
+        await fetchAgenda();
+    } catch (e) {
+        mostrarToast(e.response?.data?.error || "Error al eliminar", "error");
+    } finally {
+        isDeleting.value = false;
+    }
 };
 
 // Modal Nuevo
@@ -1051,6 +1023,19 @@ const cerrarModal = () => {
         motivo: '',
     };
 };
+
+
+const formatHora = (hora) => {
+    if (!hora) return '--:--';
+    return hora.slice(0, 5); // "11:00:00" → "11:00"
+};
+
+const formatFecha = (fecha) => {
+    if (!fecha) return '';
+    const [y, m, d] = fecha.split('-');
+    return `${d}/${m}/${y}`;
+};
+
 
 // búsqueda paciente
 let timeoutBusqueda = null;
